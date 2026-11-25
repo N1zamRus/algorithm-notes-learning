@@ -16,13 +16,29 @@ try {
 }
 
 function render() {
-  list.replaceChildren(...notes.map(note => {
+  list.replaceChildren(...notes.map((note, index) => {
     const item = document.createElement('li');
     const heading = document.createElement('strong');
     const content = document.createElement('p');
+    const remove = document.createElement('button');
     heading.textContent = note.title;
     content.textContent = note.text;
-    item.append(heading, content);
+    remove.type = 'button';
+    remove.textContent = 'Удалить';
+    remove.setAttribute('aria-label', `Удалить заметку: ${note.title}`);
+    remove.addEventListener('click', () => {
+      const updated = notes.filter((_, i) => i !== index);
+      try {
+        localStorage.setItem('algorithm-notes', JSON.stringify(updated));
+      } catch {
+        message.textContent = 'Не удалось удалить заметку. Проверьте доступность хранилища браузера.';
+        return;
+      }
+      notes = updated;
+      message.textContent = '';
+      render();
+    });
+    item.append(heading, content, remove);
     return item;
   }));
 }
